@@ -1,0 +1,150 @@
+	
+	<!doctype html>
+<html lang="en">
+  <head>
+    <title>ALEXFINN - Go</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+    
+    <link href="/css/milk.min.css" rel="stylesheet">
+    <link href="/css/milk-responsive.min.css" rel="stylesheet">     
+    <link href="/css/style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link rel="shortcut icon" href="/images/alexfinn.ico">
+    <link rel="apple-touch-icon" href="">
+    <link rel="canonical" href="https://zuoxiaoxian.github.com/post/programme/go/">
+
+    
+    <link href="/rss.xml" type="application/atom+xml" rel="alternate" title="My New Hugo Site">
+
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">
+  <div id="navbar-inner">
+    <div id="logo">
+       <a href=""><img src="/images/letter-a.png" width="100px"></img></a>
+    </div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="content">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="posts">
+
+
+	    
+	  <div class="post">
+	    <header class="post-header">
+	        <h1><a href="/post/programme/go/">Go</a></h1>
+	        <div class="post-time">September 6 2019</div>
+	    </header>
+	    <div class="post-after">
+	        <div class="tags">
+	            
+	        </div>
+	    </div>
+	    <hr>
+	    <div class="post content">
+	        <figure>
+    <img src="https://kieranhealy.org/files/misc/socsci_phd_trends.png"
+         alt="PhD Trends in the Social Sciences"/> <figcaption>
+            <p>PhDs awarded in selected disciplines, 2006-2016.</p>
+        </figcaption>
+</figure>
+
+<p><a href="https://twitter.com/ThierryRossier/status/1142696462989611009?s=20">Thierry Rossier asked me</a> for the code to produce plots like the one above. The data come from the Survey of Earned Doctorates, a very useful resource for tracking trends in PhDs awarded in the United States. The plot is made with <code>geom_line()</code> and <code>geom_label_repel()</code>. The trick, if it can be dignified with that term, is to use <code>geom_label_repel()</code> on a subset of the data that contains the last year of observations only. That way we can label the endpoints in a nice way, which I think is often preferable to a key or legend that the reader has to refer to in order to decode the graph. The <code>gghighlight</code> package (<a href="https://github.com/yutannihilation/gghighlight">https://github.com/yutannihilation/gghighlight</a>) will do this for you in a single step. But this works, too.</p>
+
+<p>Here&rsquo;s the code for the plot shown here. Code and data for it and several others is available on GitHub at <a href="https://github.com/kjhealy/earned_doctorates">https://github.com/kjhealy/earned_doctorates</a>.</p>
+
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#f92672">library</span>(tidyverse)
+<span style="color:#f92672">library</span>(janitor)
+<span style="color:#f92672">library</span>(socviz)
+<span style="color:#f92672">library</span>(ggrepel)
+
+<span style="color:#75715e">## --------------------------------------------------------------------</span>
+<span style="color:#75715e">## Custom font and theme, omit if you don&#39;t have the myriad library</span>
+<span style="color:#75715e">## (https://github.com/kjhealy/myriad) and associated Adobe fonts.</span>
+<span style="color:#75715e">## --------------------------------------------------------------------</span>
+<span style="color:#f92672">library</span>(showtext)
+showtext_auto()
+<span style="color:#f92672">library</span>(myriad)
+import_myriad_semi()
+
+theme_set(theme_myriad_semi())
+
+phds <span style="color:#f92672">&lt;-</span> read_csv(<span style="color:#e6db74">&#34;data/earned_doctorates_table.csv&#34;</span>)
+
+phds <span style="color:#f92672">&lt;-</span> clean_names(gather(phds, year, n, <span style="color:#e6db74">`2006`</span><span style="color:#f92672">:</span><span style="color:#e6db74">`2016`</span>))
+phds<span style="color:#f92672">$</span>year <span style="color:#f92672">&lt;-</span> <span style="color:#66d9ef">as.numeric</span>(phds<span style="color:#f92672">$</span>year)
+
+phds_all <span style="color:#f92672">&lt;-</span> phds <span style="color:#f92672">%&gt;%</span> group_by(discipline, year) <span style="color:#f92672">%&gt;%</span> 
+  tally(n) 
+  
+p <span style="color:#f92672">&lt;-</span> ggplot(phds_all, aes(x <span style="color:#f92672">=</span> int_to_year(year), y <span style="color:#f92672">=</span> n, color <span style="color:#f92672">=</span> discipline)) <span style="color:#f92672">+</span> 
+  geom_line(size <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.1</span>) <span style="color:#f92672">+</span> 
+  geom_label_repel(data <span style="color:#f92672">=</span> <span style="color:#66d9ef">subset</span>(phds_all, year <span style="color:#f92672">==</span> <span style="color:#ae81ff">2016</span>),  
+                  aes(x <span style="color:#f92672">=</span> int_to_year(year), y <span style="color:#f92672">=</span> n, 
+                      label <span style="color:#f92672">=</span> discipline, 
+                      color <span style="color:#f92672">=</span> discipline), 
+                  size <span style="color:#f92672">=</span> rel(<span style="color:#ae81ff">2.1</span>),
+                  nudge_x <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>,
+                  label.padding <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.2</span>,
+                  box.padding <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.1</span>,
+                  segment.color <span style="color:#f92672">=</span> <span style="color:#66d9ef">NA</span>,
+                  inherit.aes <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>) <span style="color:#f92672">+</span> 
+  scale_y_continuous(labels <span style="color:#f92672">=</span> scales<span style="color:#f92672">::</span>comma) <span style="color:#f92672">+</span> 
+  scale_x_date(breaks <span style="color:#f92672">=</span> int_to_year(<span style="color:#66d9ef">seq</span>(<span style="color:#ae81ff">2006</span>, <span style="color:#ae81ff">2016</span>, by <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>)), 
+               date_labels <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;%Y&#34;</span>) <span style="color:#f92672">+</span> 
+  coord_cartesian(xlim <span style="color:#f92672">=</span> <span style="color:#66d9ef">c</span>(int_to_year(<span style="color:#ae81ff">2006</span>), int_to_year(<span style="color:#ae81ff">2018</span>))) <span style="color:#f92672">+</span> 
+  guides(color <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>, label <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>) <span style="color:#f92672">+</span> 
+  labs(x <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Year&#34;</span>, y <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Count&#34;</span>, 
+       title <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Doctorates Awarded in the U.S., 2006-2016&#34;</span>, 
+       subtitle <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Selected Disciplines&#34;</span>, 
+       caption <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Source: Survey of Earned Doctorates&#34;</span>) 
+  
+ggsave(<span style="color:#e6db74">&#34;figures/socsci_phd_trends.png&#34;</span>, p, width <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>, height <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>) </code></pre></div>
+
+	    </div>
+	    
+	<div class="about">
+	<p> 
+     
+    </p>
+</div>
+		<nav id="pagination">
+			
+			<a class="next" href="https://zuoxiaoxian.github.com/post/programme/python/">Next</a>
+		</nav>
+	
+		        <footer>
+		        	Built with <a href="https://github.com/spf13/hugo">Hugo</a>
+		        	<p>© Alexander Feller 2018</p>
+		        </footer>
+		    </div>
+		  </div>
+		</div>
+      </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + ":change-me";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 4]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
+    g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src="http://change-me" style="border:0;" alt="" /></p></noscript>
+
+
+</html>
+

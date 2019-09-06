@@ -1,0 +1,19 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>My New Hugo Site on My New Hugo Site </title>
+    <link>https://zuoxiaoxian.github.com/</link>
+    <language>en-us</language>
+    <author>Alexander Ivanov</author>
+    <updated>2019-09-06 16:13:29 &#43;0800 CST</updated>
+    
+    <item>
+      <title>Posts</title>
+      <link>https://zuoxiaoxian.github.com/post/</link>
+      <pubDate>Fri, 06 Sep 2019 16:13:29 CST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>https://zuoxiaoxian.github.com/post/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
